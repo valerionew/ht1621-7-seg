@@ -265,7 +265,7 @@ void HT1621::print(long num){
 		num = -99999; // clip into -99999
 
 	char localbuffer[7]; //buffer to work with in the function
-	snprintf(localbuffer,7, "%6li", num); // convert the decimal into string
+	snprintf(localbuffer,7, "%06li", num); // convert the decimal into string
 
 	for(int i=0; i<6; i++){
 		_buffer[i] &= 0x80; // mask the first bit, used by batter and decimal point
