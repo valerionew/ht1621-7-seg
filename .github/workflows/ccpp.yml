@@ -1,23 +1,13 @@
-# from https://github.com/arduino/actions/blob/master/libraries/compile-examples
+# from https://github.com/marketplace/actions/run-arduino-builder
 
-name: 'Arduino Libraries - Compile Examples'
-on: [push]
-uses: arduino/setup-arduino-cli@v1.0.0
-description: 'Compiles all the examples included in the library'
-inputs:
-  cli-version:
-    description: 'Version of arduino-cli to use when builing'
-    default: 'latest'
-  fqbn:
-    description: 'Full qualified board name, with Boards Manager URL if needed'
-    default: 'arduino:avr:uno'
-  libraries:
-    description: 'List of library dependencies to install (space separated)'
-    default: ''
-runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.cli-version }}
-    - ${{ inputs.fqbn }}
-    - ${{ inputs.libraries }}
+name: Build examples
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build all example sketches
+      uses: arduino/setup-arduino-cli@v1.0.0
+      with:
+        board: "arduino:avr:uno"
