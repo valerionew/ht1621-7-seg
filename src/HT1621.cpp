@@ -1,6 +1,6 @@
 /*******************************************************************************
 Copyright 2016-2018 anxzhu (github.com/anxzhu)
-Copyright 2018 Valerio Nappi (github.com/5N44P) (changes)
+Copyright 2018-2020 Valerio Nappi (github.com/5N44P) (changes)
 Based on segment-lcd-with-ht1621 from anxzhu (2016-2018)
 (https://github.com/anxzhu/segment-lcd-with-ht1621)
 
@@ -179,74 +179,6 @@ void HT1621::clear(){
 
 }
 
-// old code for reference
-
-/*void HT1621::dispnum(float num){ //传入显示的数据，最高位为小数点和电量显示，显示数据为0.001-99999.9
-//
-
-	floatToString(_buffer,num,4);
- char temp;
-
-	//unsigned char lednum[10]={0x7D,0x60,0x3E,0x7A,0x63,0x5B,0x5F,0x70,0x7F,0x7B};//显示 0 1 2 3 4 5 6 7 8 9
-	unsigned int i;
-	for(i=0;i<7;i++){
-
-		if(temp=='0'){
-			_buffer[i]|=0x7D;
-		}
-		else if (temp=='1'){
-			_buffer[i]|=0x60;
-		}
-		else if (temp=='2'){
-			_buffer[i]|=0x3e;
-		}
-		else if (temp=='3'){
-			_buffer[i]|=0x7a;
-		}
-		else if (temp=='4'){
-			_buffer[i]|=0x63;
-		}
-		else if (temp=='5'){
-			_buffer[i]|=0x5b;
-		}
-		else if( temp=='6'){
-			_buffer[i]|=0x5f;
-		}
-		else if (temp=='7'){
-			_buffer[i]|=0x70;
-		}
-		else if (temp=='8'){
-			_buffer[i]|=0x7f;
-		}
-		else if (temp=='9'){
-			_buffer[i]|=0x7b;
-		}
-		else if (temp=='.'){
-			_buffer[i]|=0xff;
-		}
-		else if (temp=='-'){
-			_buffer[i]|=0x02;
-		}
-	}
-
-
-
-		int dpposition;
-		//find the position of the decimal point (0xff) in the buffer
-		dpposition = strchr(_buffer, 0xff)-_buffer;
-		_buffer[dpposition] = 0x80 | _buffer[dpposition+1];
-
-		for(int i=BUFFERSIZE; i<dpposition-1; i--){
-		 _buffer[i] =  _buffer[i+1];
-
-		}
-
-
-
-
-	update();
-} */
-
 void HT1621::update(){ // takes the buffer and puts it straight into the driver
 		// the buffer is backwards with respect to the lcd. could be improved
 		wrone(0, _buffer[5]);
@@ -258,14 +190,22 @@ void HT1621::update(){ // takes the buffer and puts it straight into the driver
 
 }
 
-void HT1621::print(long num){
+
+void HT1621::print(long num, char*flags="%6li",int precision = 0){
 	if(num > 999999) // basic checks
 		num = 999999; // clip into 999999
 	if(num < -99999) // basic checks
 		num = -99999; // clip into -99999
 
-	char localbuffer[7]; //buffer to work with in the function
-	snprintf(localbuffer,7, "%06li", num); // convert the decimal into string
+	char localbuffer[7]; //buffer to work within the function
+	snprintf(localbuffer,7, flags, num); // convert the decimal into string
+
+	// horrible handling but should get us working. needs refactor in next major
+  if(precision > 0 && num < pow(10, precision)) {
+    for(int i = 0; i<(5-precision); i++){
+      localbuffer[i] = ' ';
+    }
+  }
 
 	for(int i=0; i<6; i++){
 		_buffer[i] &= 0x80; // mask the first bit, used by batter and decimal point
@@ -303,6 +243,8 @@ void HT1621::print(long num){
 			case '-':
 				_buffer[i] |= 0x02;
 				break;
+			default: // do nothing, blank digit!
+				break;
 			}
 		}
 
@@ -328,11 +270,18 @@ void HT1621::print(float num, int precision){
 	if(precision < 0)
 		precision = 0; // negative precision?!
 
+	char * flags = "%6li";
+
+	if(precision > 0 && num < 1){
+		flags = "%06li";
+	}
+
 	long ingegerpart;
 	ingegerpart = ((long)(num*pow(10,precision)));
 
-	print(ingegerpart); // draw the integerized number
+	print(ingegerpart,flags); // draw the integerized number
 	setdecimalseparator(precision); // draw the decimal point
+
 
 	update();
 }
@@ -352,19 +301,4 @@ void HT1621::setdecimalseparator(int decimaldigits) {
 	// the last three are for the decimal point
 	_buffer[6-decimaldigits] |= 0x80;
 
-	// refactoring, old code for reference
-	/*switch(decimaldigits){
-		case 1:
-			_buffer[5] |= 0x80;
-			break;
-		case 2:
-			_buffer[4] |= 0x80;
-			break;
-		case 3:
-			_buffer[3] |= 0x80;
-			break;
-		case 0:
-		default:
-			break;
-	}*/
 	}

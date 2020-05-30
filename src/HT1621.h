@@ -1,6 +1,6 @@
 /*******************************************************************************
 Copyright 2016-2018 anxzhu (github.com/anxzhu)
-Copyright 2018 Valerio Nappi (github.com/5N44P) (changes)
+Copyright 2018-2020 Valerio Nappi (github.com/5N44P) (changes)
 Based on segment-lcd-with-ht1621 from anxzhu (2016-2018)
 (https://github.com/anxzhu/segment-lcd-with-ht1621)
 
@@ -55,6 +55,7 @@ public:
 	void noBacklight();
 	void setBatteryLevel(int level);
 	void print(long num);
+	void print(long num, char*flags,int precision);
 	void print(float num);
 	void print(float num, int precision);
 	void display();
