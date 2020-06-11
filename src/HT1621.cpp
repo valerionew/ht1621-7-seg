@@ -191,7 +191,7 @@ void HT1621::update(){ // takes the buffer and puts it straight into the driver
 }
 
 
-void HT1621::print(long num, char*flags="%6li",int precision = 0){
+void HT1621::print(long num, char*flags,int precision){
 	if(num > 999999) // basic checks
 		num = 999999; // clip into 999999
 	if(num < -99999) // basic checks
@@ -206,6 +206,13 @@ void HT1621::print(long num, char*flags="%6li",int precision = 0){
       localbuffer[i] = ' ';
     }
   }
+
+	#ifdef HTDEBUG
+		Serial.print("\n\n");
+		for(int jdbg = 0; jdbg < 6; jdbg++){
+			Serial.print(localbuffer[jdbg]);
+		}
+	#endif
 
 	for(int i=0; i<6; i++){
 		_buffer[i] &= 0x80; // mask the first bit, used by batter and decimal point
@@ -252,13 +259,8 @@ void HT1621::print(long num, char*flags="%6li",int precision = 0){
 
 }
 
-void HT1621::print(float num){
-	// could be smarter and actually check how many
-	// non zeros we have in the decimals
-	print(num, 3);
-}
 
-void HT1621::print(float num, int precision){
+void HT1621::print(double num, int precision){
 	if(num > 999999) // basic checks
 		num = 999999; // clip into 999999
 	if(num < -99999) // basic checks
@@ -279,7 +281,7 @@ void HT1621::print(float num, int precision){
 	long ingegerpart;
 	ingegerpart = ((long)(num*pow(10,precision)));
 
-	print(ingegerpart,flags); // draw the integerized number
+	print(ingegerpart,flags,precision); // draw the integerized number
 	setdecimalseparator(precision); // draw the decimal point
 
 

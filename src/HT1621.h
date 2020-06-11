@@ -44,6 +44,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define  WDTDIS1  0X0A             //0b1000 0000 1010  禁止看门狗
 #define  BUFFERSIZE 12
 
+// #define HTDEBUG
+
+
 class  HT1621
 {
 public:
@@ -54,10 +57,8 @@ public:
 	void backlight();
 	void noBacklight();
 	void setBatteryLevel(int level);
-	void print(long num);
-	void print(long num, char*flags,int precision);
-	void print(float num);
-	void print(float num, int precision);
+	void print(long num, char*flags="%6li", int precision = 0);
+	void print(double num, int precision = 3);
 	void display();
 	void noDisplay();
 private:
